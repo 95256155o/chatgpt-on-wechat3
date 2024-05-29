@@ -22,14 +22,22 @@ jobs:
             mkdir -p /tmp/${{ github.repository }}
             cp .github/workflows/sync.yml /tmp/${{ github.repository }}/sync.yml
           fi
-
+      - name: Configure Git merge strategy for plugins directory
+        run: git config merge.ours.driver true
+        
       - name: Sync with upstream
         run: |
           git remote add upstream https://github.com/zhayujie/chatgpt-on-wechat.git
           git fetch upstream
           git checkout master
           git rebase upstream/master
-
+          
+      - name: Add .gitattributes to version control
+        run: |
+          echo "plugins/** merge=ours" > .gitattributes
+          git add .gitattributes
+          git commit -m "Add .gitattributes for merge strategy"
+          
       - name: Restore sync.yml
         run: |
           if [ -f /tmp/${{ github.repository }}/sync.yml ]; then
